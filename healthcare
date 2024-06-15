@@ -1,0 +1,36 @@
+import pandas as pd
+data = pd.read_csv('healthcare.csv')
+
+
+# fit_transform smoker & sex
+from sklearn.preprocessing import LabelEncoder
+label_encoder = LabelEncoder()
+
+
+
+charges = []
+for i in data.charges:
+    if i >= 2800:
+        charges.append(True)
+    elif i <= 2800:
+        charges.append(False)
+target = pd.DataFrame(charges)
+for i in target:
+    target[i] = label_encoder.fit_transform(target[i])
+for i in data:
+    data['sex'] = label_encoder.fit_transform(data['sex'])
+    data['smoker'] = label_encoder.fit_transform(data['smoker'])
+    
+# training datasets
+from sklearn.model_selection import train_test_split
+xtrain, xtest, ytrain, ytest = train_test_split(data[['age', 'smoker']], target, train_size=0.2)
+
+
+from sklearn.ensemble import RandomForestClassifier
+rf = RandomForestClassifier()
+rf.fit(xtrain, ytrain)
+score_RF = rf.score(xtest, ytest)
+score_RF # around avg 92-84% accu
+
+predicted = rf.predict(xtest)
+print('xtest: ','\n', xtest[:20], '\n', predicted[:20])
